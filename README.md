@@ -56,6 +56,10 @@ Architecture Diagram
 -------
 ![Diagram](/diagrams/Architecture_Diagram.png)
 
+Documentation
+-------
+[Project Description (PDF)](/docs/Project_Description.pdf)
+
 Authors
 -------
 [Victor Ekimov](https://github.com/NorthernDemon)
