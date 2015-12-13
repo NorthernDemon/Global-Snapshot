@@ -14,11 +14,9 @@ import java.util.Map;
  */
 public interface NodeServer extends Remote {
 
-    @NotNull
-    Node getNode() throws RemoteException;
+    @NotNull Node getNode() throws RemoteException;
 
-    @NotNull
-    Map<Integer, String> getNodes() throws RemoteException;
+    @NotNull Map<Integer, String> getNodes() throws RemoteException;
 
     void addNode(int id, @NotNull String host) throws RemoteException;
 

@@ -4,7 +4,6 @@ import nl.tue.ds.Replication;
 import nl.tue.ds.ServiceConfiguration;
 import nl.tue.ds.entity.Item;
 import nl.tue.ds.entity.Node;
-import nl.tue.ds.util.MultithreadingUtil;
 import nl.tue.ds.util.RemoteUtil;
 import nl.tue.ds.util.StorageUtil;
 import org.apache.logging.log4j.LogManager;
@@ -23,9 +22,9 @@ import java.util.concurrent.locks.ReentrantReadWriteLock;
 
 /**
  * Provides an access to remote node via RMI
- * <p/>
+ * <p>
  * Uses read/write locks for manipulation with internal data structure of the node in case of multiple requests
- * <p/>
+ * <p>
  * Read Lock: multiple readers can enter, if not locked for writing
  * Write Lock: only one writer can enter, if not locked for reading
  *
@@ -190,7 +189,7 @@ public final class NodeRemote extends UnicastRemoteObject implements NodeServer,
 
     /**
      * Returns collection of items and replicas
-     * <p/>
+     * <p>
      * Replicas are requested concurrently and returned as soon as R replicas replied
      *
      * @param itemKey of the item
@@ -212,9 +211,9 @@ public final class NodeRemote extends UnicastRemoteObject implements NodeServer,
 
     /**
      * Creates new item if exists or updates existing item with new value and increased version number
-     * <p/>
+     * <p>
      * Replicas are updated concurrently
-     * <p/>
+     * <p>
      * Amount of replicas operational must satisfy formula [ Q == max( R , W ) ], where:
      * - Q is the number of replicas and items gotten from operational nodes
      * - R and W are read and write quorums respectively

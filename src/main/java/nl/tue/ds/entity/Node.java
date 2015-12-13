@@ -29,7 +29,7 @@ public final class Node implements Serializable {
 
     /**
      * Own items, for which the node is responsible for
-     * <p/>
+     * <p>
      * Map<ItemKey, Item>
      */
     @NotNull
@@ -37,7 +37,7 @@ public final class Node implements Serializable {
 
     /**
      * Replicated items from predecessor nodes
-     * <p/>
+     * <p>
      * Map<ItemKey, Item>
      */
     @NotNull
@@ -45,7 +45,7 @@ public final class Node implements Serializable {
 
     /**
      * All known nodes in the ring, including itself
-     * <p/>
+     * <p>
      * Map<NodeId, Host>
      */
     // TODO should this be a double linked list instead ?

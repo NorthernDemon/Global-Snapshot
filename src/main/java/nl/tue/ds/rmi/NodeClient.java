@@ -12,9 +12,7 @@ import java.rmi.RemoteException;
  */
 public interface NodeClient extends Remote {
 
-    @Nullable
-    Item getItem(int key) throws RemoteException;
+    @Nullable Item getItem(int key) throws RemoteException;
 
-    @Nullable
-    Item updateItem(int key, @NotNull String value) throws RemoteException;
+    @Nullable Item updateItem(int key, @NotNull String value) throws RemoteException;
 }

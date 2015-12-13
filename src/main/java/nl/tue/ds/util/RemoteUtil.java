@@ -1,9 +1,9 @@
 package nl.tue.ds.util;
 
 import nl.tue.ds.entity.Node;
+import nl.tue.ds.rmi.NodeClient;
 import nl.tue.ds.rmi.NodeServer;
 import nl.tue.ds.rmi.NullNodeRemote;
-import nl.tue.ds.rmi.NodeClient;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.jetbrains.annotations.NotNull;
