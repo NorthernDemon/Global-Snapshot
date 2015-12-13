@@ -12,13 +12,13 @@
     <properties>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <service.properties>service.properties</service.properties>
-        <jdk.version>1.7</jdk.version>
-        <maven-compiler-plugin.version>3.2</maven-compiler-plugin.version>
+        <jdk.version>1.8</jdk.version>
+        <maven-compiler-plugin.version>3.3</maven-compiler-plugin.version>
         <maven-antrun-plugin.version>1.8</maven-antrun-plugin.version>
-        <maven-assembly-plugin.version>2.5.3</maven-assembly-plugin.version>
-        <log4j.version>2.2</log4j.version>
-        <guava.version>18.0</guava.version>
-        <annotations.version>13.0</annotations.version>
+        <maven-assembly-plugin.version>2.6</maven-assembly-plugin.version>
+        <log4j.version>2.4.1</log4j.version>
+        <guava.version>19.0</guava.version>
+        <annotations.version>15.0</annotations.version>
     </properties>
 
     <build>
