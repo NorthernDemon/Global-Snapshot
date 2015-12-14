@@ -18,20 +18,20 @@ public abstract class ServiceConfiguration {
 
     private static int rmiPort;
 
-    private static int replicationW;
+    private static int bankInitialAmount;
 
-    private static int replicationR;
+    private static int bankTransferMinAmount;
 
-    private static int replicationN;
+    private static int bankTransferMaxAmount;
 
     static {
         try {
             Properties properties = new Properties();
             properties.load(new FileInputStream(CONFIGURATION_FILE));
             rmiPort = Integer.parseInt(properties.getProperty("rmi-port"));
-            replicationW = Integer.parseInt(properties.getProperty("replication-w"));
-            replicationR = Integer.parseInt(properties.getProperty("replication-r"));
-            replicationN = Integer.parseInt(properties.getProperty("replication-n"));
+            bankInitialAmount = Integer.parseInt(properties.getProperty("bank-initial-amount"));
+            bankTransferMinAmount = Integer.parseInt(properties.getProperty("bank-transfer-min-amount"));
+            bankTransferMaxAmount = Integer.parseInt(properties.getProperty("bank-transfer-max-amount"));
         } catch (IOException e) {
             logger.error("Failed to load service configuration!", e);
         }
@@ -41,15 +41,15 @@ public abstract class ServiceConfiguration {
         return rmiPort;
     }
 
-    public static int getReplicationW() {
-        return replicationW;
+    public static int getBankInitialAmount() {
+        return bankInitialAmount;
     }
 
-    public static int getReplicationR() {
-        return replicationR;
+    public static int getBankTransferMinAmount() {
+        return bankTransferMinAmount;
     }
 
-    public static int getReplicationN() {
-        return replicationN;
+    public static int getBankTransferMaxAmount() {
+        return bankTransferMaxAmount;
     }
 }

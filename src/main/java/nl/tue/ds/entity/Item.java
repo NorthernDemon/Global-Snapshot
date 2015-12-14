@@ -1,7 +1,6 @@
 package nl.tue.ds.entity;
 
 import com.google.common.base.MoreObjects;
-import nl.tue.ds.Replication;
 import org.jetbrains.annotations.NotNull;
 
 import java.io.Serializable;
@@ -11,7 +10,6 @@ import java.util.Objects;
  * Items are put in the ring under the responsible node (NodeId >= itemKey) and replicated to N successors
  *
  * @see Node
- * @see Replication
  */
 public final class Item implements Serializable {
 

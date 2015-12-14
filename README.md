@@ -4,27 +4,22 @@ Global-Snapshot
 Introduction
 -------
 
-Chandy-Lamport snapshot algorithm
+Distributed Snapshot uses [Chandy-Lamport snapshot algorithm](https://en.wikipedia.org/wiki/Snapshot_algorithm) and applied into a simple banking application. Application is build on top of [Java RMI](http://en.wikipedia.org/wiki/Java_remote_method_invocation), which is an object-oriented equivalent of remote procedure calls ([RPC](http://en.wikipedia.org/wiki/Remote_procedure_call)).
 
-Distributed Hash Table with Data Partitioning and Concurrent Replication inspired by [Amazon Dynamo](http://www.allthingsdistributed.com/files/amazon-dynamo-sosp2007.pdf). Application is build on top of [Java RMI](http://en.wikipedia.org/wiki/Java_remote_method_invocation), which is an object-oriented equivalent of remote procedure calls ([RPC](http://en.wikipedia.org/wiki/Remote_procedure_call)).
+Bank branches are treated as nodes, which form a strongly connected graph (single connected component). Each node has an initial balances and start exchanging random amount of money (within predefined boundaries) at fixed time rate as soon as they are connected. Any node can initiate snapshot and log it into *.csv file.
 
-Server nodes form a ring topology with items and nodes put in ascending order. Each node is responsible for items, falling into the space between current node inclusively and predecessor node exclusively. Client can get/update item from any node in the ring, even if coordinator node does not have item itself.
+Distributed Snapshot effectively selects a consistent cut (no messages jump from future into the past and no message receipt is recorded without send) and is a non-blocking algorithm. Snapshot reflects the global state in which the distributed system might have been.
 
 ####Features
-    - server node can join or leave the ring
-    - server can be crashed and recovered
-    - server can be run on separate hosts
-    - server supports replication of items
-    - client can view topology of the ring
-    - client can get/update items and replicas concurrently
+    - nodes can be run on separate hosts
+    - nodes can join but cannot leave (for simplicity of the cut)
+    - nodes can initiate and log the distributed snapshot
+    - multiple snapshots can be taken at a same time (distinguished by snapshot ID)
 
 ####Assumptions
-    - node serves one client at a time
-    - all nodes know each other in the ring, but cannot tell if it is operational or not
-    - nodes join/leave/crash/recover one at a time when there are no ongoing requests
-    - nodes knows one existing node (id and host) in the ring in order to join/recover
-    - client knows one existing node (id and host) in the ring in order to get/update/view
-    - no parallel client requests affecting the same item
+    - system is peer-to-peer: any bank can connect to any other
+    - bank makes new transfer immediately after the previous one
+    - nodes knows one existing node (id and host) in the graph in order to join
 
 Installation
 -------
@@ -35,18 +30,11 @@ Configure service parameters in **service.properties** file.
 ####Run inside of IDE
     - mvn clean install
     - run main ServerLauncher.java
-    - run main ClientLauncher.java
     
 ####Run as executable JAR
     - mvn clean install
-    - execute following line in new window to start the server:
-        - java -jar DHT-${version}-server-jar-with-dependencies.jar
-    - execute following line in new window to start the client:
-        - java -jar DHT-${version}-client-jar-with-dependencies.jar
-
-Use Case Diagram
--------
-![Diagram](/diagrams/Use_Case_Diagram.png)
+    - execute following line in new window to start the node (bank):
+        - java -jar GlobalSnapshot-${version}-jar-with-dependencies.jar
 
 Server Nodes State Machine Diagram
 -------

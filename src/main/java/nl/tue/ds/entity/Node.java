@@ -1,7 +1,6 @@
 package nl.tue.ds.entity;
 
 import com.google.common.base.MoreObjects;
-import nl.tue.ds.Replication;
 import org.jetbrains.annotations.NotNull;
 
 import java.io.Serializable;
@@ -12,7 +11,6 @@ import java.util.*;
  * Nodes store items, such that (NodeId >= itemKey) and replicas of N predecessor's node items
  *
  * @see Item
- * @see Replication
  */
 public final class Node implements Serializable {
 
@@ -36,21 +34,12 @@ public final class Node implements Serializable {
     private final Map<Integer, Item> items = new TreeMap<>();
 
     /**
-     * Replicated items from predecessor nodes
-     * <p>
-     * Map<ItemKey, Item>
-     */
-    @NotNull
-    private final Map<Integer, Item> replicas = new TreeMap<>();
-
-    /**
-     * All known nodes in the ring, including itself
+     * All known nodes in the graph, including itself
      * <p>
      * Map<NodeId, Host>
      */
-    // TODO should this be a double linked list instead ?
     @NotNull
-    private final Map<Integer, String> nodes = new TreeMap<>();
+    private final Map<Integer, String> nodes = new HashMap<>();
 
     public Node(int id, @NotNull String host) {
         this.id = id;
@@ -78,34 +67,6 @@ public final class Node implements Serializable {
         nodes.remove(id);
     }
 
-    public void putItems(@NotNull Collection<Item> items) {
-        for (Item item : items) {
-            if (!replicas.containsKey(item.getKey())) {
-                this.items.put(item.getKey(), item);
-            }
-        }
-    }
-
-    public void removeItems(@NotNull Collection<Item> items) {
-        for (Item item : items) {
-            this.items.remove(item.getKey());
-        }
-    }
-
-    public void putReplicas(@NotNull Collection<Item> replicas) {
-        for (Item replica : replicas) {
-            if (!items.containsKey(replica.getKey())) {
-                this.replicas.put(replica.getKey(), replica);
-            }
-        }
-    }
-
-    public void removeReplicas(@NotNull Collection<Item> replicas) {
-        for (Item replica : replicas) {
-            this.replicas.remove(replica.getKey());
-        }
-    }
-
     public int getId() {
         return id;
     }
@@ -117,10 +78,6 @@ public final class Node implements Serializable {
 
     public Map<Integer, Item> getItems() {
         return Collections.unmodifiableMap(items);
-    }
-
-    public Map<Integer, Item> getReplicas() {
-        return Collections.unmodifiableMap(replicas);
     }
 
     public Map<Integer, String> getNodes() {
@@ -152,7 +109,6 @@ public final class Node implements Serializable {
                 .add("id", id)
                 .add("host", host)
                 .add("items", Arrays.toString(items.keySet().toArray()))
-                .add("replicas", Arrays.toString(replicas.keySet().toArray()))
                 .add("nodes", Arrays.toString(nodes.entrySet().toArray()))
                 .toString();
     }

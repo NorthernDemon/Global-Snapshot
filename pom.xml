@@ -58,37 +58,19 @@
                 <version>${maven-assembly-plugin.version}</version>
                 <executions>
                     <execution>
-                        <id>server</id>
+                        <id>bank</id>
                         <phase>package</phase>
                         <goals>
                             <goal>single</goal>
                         </goals>
                         <configuration>
-                            <finalName>${project.artifactId}-${project.version}-server</finalName>
+                            <finalName>${project.artifactId}-${project.version}</finalName>
                             <descriptorRefs>
                                 <descriptorRef>jar-with-dependencies</descriptorRef>
                             </descriptorRefs>
                             <archive>
                                 <manifest>
                                     <mainClass>nl.tue.ds.ServerLauncher</mainClass>
-                                </manifest>
-                            </archive>
-                        </configuration>
-                    </execution>
-                    <execution>
-                        <id>client</id>
-                        <phase>package</phase>
-                        <goals>
-                            <goal>single</goal>
-                        </goals>
-                        <configuration>
-                            <finalName>${project.artifactId}-${project.version}-client</finalName>
-                            <descriptorRefs>
-                                <descriptorRef>jar-with-dependencies</descriptorRef>
-                            </descriptorRefs>
-                            <archive>
-                                <manifest>
-                                    <mainClass>nl.tue.ds.ClientLauncher</mainClass>
                                 </manifest>
                             </archive>
                         </configuration>

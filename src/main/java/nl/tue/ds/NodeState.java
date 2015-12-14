@@ -10,17 +10,12 @@ import nl.tue.ds.entity.Node;
 public enum NodeState {
 
     /**
-     * Node is currently in the ring and operational
+     * Node is currently operational
      */
     CONNECTED,
 
     /**
-     * Node is currently NOT in the ring, therefore NOT operational
+     * Node is currently NOT operational
      */
-    DISCONNECTED,
-
-    /**
-     * Node is currently in the ring, but NOT operational
-     */
-    CRASHED,
+    DISCONNECTED
 }
