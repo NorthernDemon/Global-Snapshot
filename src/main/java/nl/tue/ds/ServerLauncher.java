@@ -67,7 +67,7 @@ public final class ServerLauncher {
         logger.info("Example: view");
         StorageUtil.init();
         NetworkUtil.printMachineIPv4();
-        logger.info("Server Bank is ready for request >");
+        logger.info("Bank is ready for request >");
         InputUtil.readInput(ServerLauncher.class.getName());
     }
 
