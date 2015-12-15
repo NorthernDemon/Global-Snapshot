@@ -27,9 +27,6 @@ public final class Item implements Serializable {
      */
     private int moneyInTransfer;
 
-    public Item() {
-    }
-
     public Item(int snapshotID, int balance, int moneyInTransfer) {
         this.snapshotID = snapshotID;
         this.balance = balance;
@@ -52,20 +49,31 @@ public final class Item implements Serializable {
         return balance;
     }
 
-    public void incrementBalance(int balance) {
-        this.balance += balance;
+    public void incrementBalance(int amount) {
+        balance += amount;
     }
 
-    public void decrementBalance(int balance) {
-        this.balance -= balance;
+    /**
+     * Checks if current balance is over or equal the amount to be deducted
+     * if it is -> deducts the money, if not -> balance stay untouched
+     *
+     * @param amount to be deducted
+     * @return whether operation succeed or not
+     */
+    public boolean decrementBalance(int amount) {
+        if (balance >= amount) {
+            balance -= amount;
+            return true;
+        }
+        return false;
     }
 
     public int getMoneyInTransfer() {
         return moneyInTransfer;
     }
 
-    public void incrementMoneyInTransfer(int moneyInTransfer) {
-        this.moneyInTransfer += moneyInTransfer;
+    public void incrementMoneyInTransfer(int amount) {
+        moneyInTransfer += amount;
     }
 
     @Override

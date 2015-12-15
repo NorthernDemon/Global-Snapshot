@@ -152,7 +152,7 @@ public final class ServerLauncher {
             return;
         }
         logger.info("Viewing topology from node=" + node);
-        for (Map.Entry<Integer, String> entry : RemoteUtil.getRemoteNode(node).getNodes().entrySet()) {
+        for (Map.Entry<Integer, String> entry : node.getNodes().entrySet()) {
             logger.info(RemoteUtil.getRemoteNode(new Node(entry.getKey(), entry.getValue())).getNode());
         }
     }

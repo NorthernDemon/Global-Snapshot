@@ -9,7 +9,6 @@ import org.jetbrains.annotations.NotNull;
 
 import java.rmi.Naming;
 import java.rmi.RemoteException;
-import java.util.Map;
 import java.util.Random;
 
 /**
@@ -39,16 +38,15 @@ public abstract class RemoteUtil {
      * Gets node given nodeId
      *
      * @param currentNode current node
-     * @param nodes       set of nodes
      * @return currentNode if nodeId is the same, remote node otherwise
      */
-    private static Node getRandomNode(@NotNull Node currentNode, @NotNull Map<Integer, String> nodes) throws RemoteException {
+    private static Node getRandomNode(@NotNull Node currentNode) throws RemoteException {
         int amount = new Random().nextInt((BankTransfer.MAX_AMOUNT - BankTransfer.MIN_AMOUNT + 1) + BankTransfer.MIN_AMOUNT);
-        int nodeId = new Random().nextInt(nodes.size());
+        int nodeId = new Random().nextInt(currentNode.getNodes().size());
         if (nodeId == currentNode.getId()) {
             return null;
         } else {
-            return getRemoteNode(new Node(nodeId, nodes.get(nodeId))).getNode();
+            return getRemoteNode(new Node(nodeId, currentNode.getNodes().get(nodeId))).getNode();
         }
     }
 }

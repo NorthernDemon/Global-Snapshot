@@ -8,7 +8,6 @@ import org.jetbrains.annotations.NotNull;
 import java.rmi.RemoteException;
 import java.rmi.server.UnicastRemoteObject;
 import java.util.Arrays;
-import java.util.Map;
 import java.util.concurrent.locks.ReadWriteLock;
 import java.util.concurrent.locks.ReentrantReadWriteLock;
 
@@ -43,20 +42,8 @@ public final class NodeRemote extends UnicastRemoteObject implements NodeServer 
     @NotNull
     @Override
     public Node getNode() throws RemoteException {
-        logger.trace("Get node=" + node);
+        logger.debug("Get node=" + node);
         return node;
-    }
-
-    @NotNull
-    @Override
-    public Map<Integer, String> getNodes() throws RemoteException {
-        nodesLock.readLock().lock();
-        try {
-            logger.debug("Get nodes=" + Arrays.toString(node.getNodes().entrySet().toArray()));
-            return node.getNodes();
-        } finally {
-            nodesLock.readLock().unlock();
-        }
     }
 
     @Override

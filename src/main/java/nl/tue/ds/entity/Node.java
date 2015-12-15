@@ -1,6 +1,7 @@
 package nl.tue.ds.entity;
 
 import com.google.common.base.MoreObjects;
+import nl.tue.ds.BankTransfer;
 import org.jetbrains.annotations.NotNull;
 
 import java.io.Serializable;
@@ -41,7 +42,7 @@ public final class Node implements Serializable {
     public Node(int id, @NotNull String host) {
         this.id = id;
         this.host = host;
-        item = new Item();
+        item = new Item(1, BankTransfer.INITIAL_BALANCE, 0);
         nodes.put(id, host);
     }
 
