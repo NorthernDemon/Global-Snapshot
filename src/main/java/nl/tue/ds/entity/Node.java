@@ -26,10 +26,16 @@ public final class Node implements Serializable {
     private final String host;
 
     /**
-     * Current state of the bank, used to compute distributed snapshot
+     * Current state of the bank
      */
     @NotNull
     private final Item item;
+
+    /**
+     * Snapshot record of the bank
+     */
+    @NotNull
+    private final Snapshot snapshot;
 
     /**
      * All known nodes in the graph, including itself
@@ -46,7 +52,8 @@ public final class Node implements Serializable {
     public Node(int id, @NotNull String host) {
         this.id = id;
         this.host = host;
-        item = new Item(1, BankTransfer.INITIAL_BALANCE, 0);
+        item = new Item(BankTransfer.INITIAL_BALANCE);
+        snapshot = new Snapshot();
         nodes.put(id, host);
     }
 
@@ -57,6 +64,15 @@ public final class Node implements Serializable {
     @NotNull
     public Item getItem() {
         return item;
+    }
+
+    @NotNull
+    public Snapshot getSnapshot() {
+        return snapshot;
+    }
+
+    public void startSnapshotRecording() {
+        snapshot.startSnapshotRecording(item.getBalance(), nodes);
     }
 
     public void putNodes(@NotNull Map<Integer, String> nodes) {
@@ -101,6 +117,7 @@ public final class Node implements Serializable {
                 .add("id", id)
                 .add("host", host)
                 .add("item", item)
+                .add("snapshot", snapshot)
                 .add("nodes", Arrays.toString(nodes.entrySet().toArray()))
                 .toString();
     }

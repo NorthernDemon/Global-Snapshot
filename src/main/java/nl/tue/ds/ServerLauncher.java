@@ -161,10 +161,8 @@ public final class ServerLauncher {
             logger.warn("Must be CONNECTED to initiate the distributed snapshot! Current nodeState=" + nodeState);
             return;
         }
-        logger.info("Viewing topology from node=" + node);
-        for (Map.Entry<Integer, String> entry : node.getNodes().entrySet()) {
-            logger.info(RemoteUtil.getRemoteNode(new Node(entry.getKey(), entry.getValue())).getNode());
-        }
+        logger.info("Starting distributed snapshot from node=" + node);
+        RemoteUtil.getRemoteNode(node).sendMarker(node.getId());
     }
 
     /**

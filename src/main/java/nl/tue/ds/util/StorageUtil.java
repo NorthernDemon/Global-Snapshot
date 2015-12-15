@@ -1,7 +1,7 @@
 package nl.tue.ds.util;
 
-import nl.tue.ds.entity.Item;
 import nl.tue.ds.entity.Node;
+import nl.tue.ds.entity.Snapshot;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.jetbrains.annotations.NotNull;
@@ -26,17 +26,17 @@ public abstract class StorageUtil {
     private static final String STORAGE_FOLDER = "storage";
 
     /**
-     * Creates/Updates list of nodes items into CSV file
+     * Creates/Updates list of nodes snapshots into CSV file
      *
      * @param node to write
      */
     public static void write(@NotNull Node node) {
         try (PrintWriter writer = new PrintWriter(getFileName(node.getId()), "UTF-8")) {
-            Item item = node.getItem();
-            writer.write(item.getSnapshotID() + SEPARATOR + item.getBalance() + SEPARATOR + item.getMoneyInTransfer() + System.getProperty("line.separator"));
-            logger.debug("Storage wrote an item=" + item);
+            @NotNull Snapshot snapshot = node.getSnapshot();
+            writer.write(snapshot.getId() + SEPARATOR + snapshot.getLocalBalance() + SEPARATOR + snapshot.getMoneyInTransfer() + System.getProperty("line.separator"));
+            logger.debug("Storage wrote an snapshot=" + snapshot);
         } catch (Exception e) {
-            logger.error("Failed to write items from node=" + node, e);
+            logger.error("Failed to write snapshot from node=" + node, e);
         }
     }
 

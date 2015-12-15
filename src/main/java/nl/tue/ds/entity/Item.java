@@ -6,43 +6,19 @@ import java.io.Serializable;
 import java.util.Objects;
 
 /**
- * Items represent an instance of distributed snapshot and associated to nodes by one-to-one relation
+ * Items represent an entity hold by the bank (balance in our case) and associated to nodes by one-to-one relation
  *
  * @see Node
  */
 public final class Item implements Serializable {
 
     /**
-     * Sequential number, current snapshot ID to be taken
-     */
-    private int snapshotID;
-
-    /**
      * Current amount of money at the bank
      */
     private int balance;
 
-    /**
-     * All money transfers from incoming channels upon receiving the marker
-     */
-    private int moneyInTransfer;
-
-    public Item(int snapshotID, int balance, int moneyInTransfer) {
-        this.snapshotID = snapshotID;
+    public Item(int balance) {
         this.balance = balance;
-        this.moneyInTransfer = moneyInTransfer;
-    }
-
-    /**
-     * Initiate new snapshot
-     */
-    public void createNewItem() {
-        snapshotID++;
-        moneyInTransfer = 0;
-    }
-
-    public int getSnapshotID() {
-        return snapshotID;
     }
 
     public int getBalance() {
@@ -68,14 +44,6 @@ public final class Item implements Serializable {
         return false;
     }
 
-    public int getMoneyInTransfer() {
-        return moneyInTransfer;
-    }
-
-    public void incrementMoneyInTransfer(int amount) {
-        moneyInTransfer += amount;
-    }
-
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
@@ -84,8 +52,7 @@ public final class Item implements Serializable {
         if (o instanceof Item) {
             Item object = (Item) o;
 
-            return Objects.equals(snapshotID, object.snapshotID) &&
-                    Objects.equals(balance, object.balance);
+            return Objects.equals(balance, object.balance);
         }
 
         return false;
@@ -93,15 +60,13 @@ public final class Item implements Serializable {
 
     @Override
     public int hashCode() {
-        return Objects.hash(snapshotID, balance);
+        return Objects.hash(balance);
     }
 
     @Override
     public String toString() {
         return MoreObjects.toStringHelper(this)
-                .add("snapshotID", snapshotID)
                 .add("balance", balance)
-                .add("moneyInTransfer", moneyInTransfer)
                 .toString();
     }
 }
