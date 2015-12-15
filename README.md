@@ -20,6 +20,7 @@ Distributed Snapshot effectively selects a consistent cut (no messages jump from
     - system is peer-to-peer: any bank can connect to any other
     - bank makes new transfer immediately after the previous one
     - nodes knows one existing node (id and host) in the graph in order to join
+    - at most one snapshot is taken at a time
 
 Installation
 -------
@@ -35,10 +36,6 @@ Configure service parameters in **service.properties** file.
     - mvn clean install
     - execute following line in new window to start the node (bank):
         - java -jar GlobalSnapshot-${version}-jar-with-dependencies.jar
-
-Server Nodes State Machine Diagram
--------
-![Diagram](/diagrams/Server_Nodes_State_Machine_Diagram.png)
 
 Architecture Diagram
 -------

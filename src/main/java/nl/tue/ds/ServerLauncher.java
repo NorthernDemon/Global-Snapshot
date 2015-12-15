@@ -154,16 +154,7 @@ public final class ServerLauncher {
     }
 
     /**
-     * Shutdown the money transfer operations and snapshot
-     */
-    public static void stop() throws RemoteException {
-        executor.shutdownNow();
-    }
-
-    /**
-     * Initiate distributed snapshot
-     * <p>
-     * TODO make it happen
+     * Initiate distributed snapshot to all known nodes (all nodes are interconnected as a digraph)
      */
     public static void cut() throws RemoteException {
         if (nodeState != NodeState.CONNECTED) {
