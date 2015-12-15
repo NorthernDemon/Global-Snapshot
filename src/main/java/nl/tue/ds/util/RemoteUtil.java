@@ -1,14 +1,16 @@
 package nl.tue.ds.util;
 
-import nl.tue.ds.BankTransfer;
 import nl.tue.ds.entity.Node;
 import nl.tue.ds.rmi.NodeServer;
+import nl.tue.ds.rmi.NullNodeRemote;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.jetbrains.annotations.NotNull;
 
 import java.rmi.Naming;
 import java.rmi.RemoteException;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Random;
 
 /**
@@ -30,7 +32,12 @@ public abstract class RemoteUtil {
             return (NodeServer) Naming.lookup("rmi://" + node.getHost() + "/NodeRemote" + node.getId());
         } catch (Exception e) {
             logger.error("Failed to get remote interface for id=" + node.getId(), e);
-            throw new RuntimeException("RMI failed miserably", e);
+            try {
+                return new NullNodeRemote(new Node());
+            } catch (RemoteException re) {
+                logger.error("Failed to get Null Node Pattern", re);
+                throw new RuntimeException("RMI failed miserably", re);
+            }
         }
     }
 
@@ -40,9 +47,9 @@ public abstract class RemoteUtil {
      * @param currentNode current node
      * @return currentNode if nodeId is the same, remote node otherwise
      */
-    private static Node getRandomNode(@NotNull Node currentNode) throws RemoteException {
-        int amount = new Random().nextInt((BankTransfer.MAX_AMOUNT - BankTransfer.MIN_AMOUNT + 1) + BankTransfer.MIN_AMOUNT);
-        int nodeId = new Random().nextInt(currentNode.getNodes().size());
+    public static Node getRandomNode(@NotNull Node currentNode) throws RemoteException {
+        List<Integer> keysAsArray = new ArrayList<>(currentNode.getNodes().keySet());
+        int nodeId = keysAsArray.get(new Random().nextInt(currentNode.getNodes().size()));
         if (nodeId == currentNode.getId()) {
             return null;
         } else {

@@ -1,5 +1,6 @@
 package nl.tue.ds;
 
+import nl.tue.ds.entity.Item;
 import nl.tue.ds.entity.Node;
 import nl.tue.ds.rmi.NodeRemote;
 import nl.tue.ds.util.InputUtil;
@@ -16,6 +17,10 @@ import java.rmi.RemoteException;
 import java.rmi.registry.LocateRegistry;
 import java.util.Arrays;
 import java.util.Map;
+import java.util.Random;
+import java.util.concurrent.Executors;
+import java.util.concurrent.ScheduledExecutorService;
+import java.util.concurrent.TimeUnit;
 
 /**
  * Simulates server node (bank) in the graph for distributed snapshot
@@ -35,6 +40,11 @@ public final class ServerLauncher {
     private static NodeState nodeState = NodeState.DISCONNECTED;
 
     /**
+     * Thread pool scheduler of N threads for money transfer and snapshot taking
+     */
+    private static final ScheduledExecutorService executor = Executors.newSingleThreadScheduledExecutor();
+
+    /**
      * Description: method name,node host,node id,existing node host,existing node id
      * Example: join,localhost,10,none,0
      * Example: join,localhost,15,localhost,10
@@ -47,7 +57,7 @@ public final class ServerLauncher {
     public static void main(String[] args) {
         logger.info("You can change service configuration parameters in " + ServiceConfiguration.CONFIGURATION_FILE);
         logger.info("Service configuration: RMI port=" + RMI_PORT);
-        logger.info("Service configuration: BankTransfer MIN_AMOUNT=" + BankTransfer.MIN_AMOUNT + ", MAX_AMOUNT=" + BankTransfer.MAX_AMOUNT + ", BankTransfer=" + BankTransfer.INITIAL_BALANCE);
+        logger.info("Service configuration: BankTransfer MIN_AMOUNT=" + BankTransfer.MIN_AMOUNT + ", MAX_AMOUNT=" + BankTransfer.MAX_AMOUNT + ", INITIAL_BALANCE=" + BankTransfer.INITIAL_BALANCE);
         if (BankTransfer.MIN_AMOUNT >= BankTransfer.MAX_AMOUNT || BankTransfer.MAX_AMOUNT >= BankTransfer.INITIAL_BALANCE) {
             logger.warn("Bank transfer properties must maintain formula [ MIN_AMOUNT < MAX_AMOUNT < INITIAL_BALANCE ] !");
             return;
@@ -86,6 +96,7 @@ public final class ServerLauncher {
         node = register(nodeId, nodeHost);
         logger.info("NodeId=" + nodeId + " is connected as first node=" + node);
         nodeState = NodeState.CONNECTED;
+        startMoneyTransferring();
     }
 
     /**
@@ -125,6 +136,7 @@ public final class ServerLauncher {
         announceJoin();
         logger.info("NodeId=" + nodeId + " connected as node=" + node + " from existingNode=" + existingNode);
         nodeState = NodeState.CONNECTED;
+        startMoneyTransferring();
     }
 
     /**
@@ -139,6 +151,13 @@ public final class ServerLauncher {
         for (Map.Entry<Integer, String> entry : node.getNodes().entrySet()) {
             logger.info(RemoteUtil.getRemoteNode(new Node(entry.getKey(), entry.getValue())).getNode());
         }
+    }
+
+    /**
+     * Shutdown the money transfer operations and snapshot
+     */
+    public static void stop() throws RemoteException {
+        executor.shutdownNow();
     }
 
     /**
@@ -206,6 +225,33 @@ public final class ServerLauncher {
                 logger.trace("Announced join to nodeId=" + entry.getKey());
             }
         }
+    }
+
+    private static void startMoneyTransferring() {
+        executor.scheduleAtFixedRate((Runnable) () -> {
+            try {
+                if (node.getNodes().size() > 1) {
+                    Node randomNode = RemoteUtil.getRandomNode(ServerLauncher.node);
+                    if (randomNode != null) {
+                        @NotNull Item item = node.getItem();
+                        int randomAmount = new Random().nextInt((BankTransfer.MAX_AMOUNT - BankTransfer.MIN_AMOUNT + 1) + BankTransfer.MIN_AMOUNT);
+                        boolean isDecremented = item.decrementBalance(randomAmount);
+                        if (isDecremented) {
+                            logger.debug("Transferring money amount=" + randomAmount + ", to nodeId=" + randomNode.getId());
+                            boolean isTransferred = RemoteUtil.getRemoteNode(randomNode).transferMoney(node.getId(), randomAmount);
+                            if (!isTransferred) {
+                                item.incrementBalance(randomAmount);
+                                logger.debug("NOT Transferred, restore balance=" + node.getItem().getBalance());
+                            } else {
+                                logger.debug("Transferred, new balance=" + node.getItem().getBalance());
+                            }
+                        }
+                    }
+                }
+            } catch (RemoteException e) {
+                logger.error("Failed to fetch random node!", e);
+            }
+        }, 0, 1, TimeUnit.SECONDS);
     }
 
     /**

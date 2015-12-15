@@ -32,6 +32,11 @@ public final class NodeRemote extends UnicastRemoteObject implements NodeServer 
      */
     private static final ReadWriteLock nodesLock = new ReentrantReadWriteLock();
 
+    /**
+     * Locks operations over the items
+     */
+    private static final ReadWriteLock itemsLock = new ReentrantReadWriteLock();
+
     @NotNull
     private final Node node;
 
@@ -55,6 +60,19 @@ public final class NodeRemote extends UnicastRemoteObject implements NodeServer 
             logger.debug("Current nodes=" + Arrays.toString(node.getNodes().entrySet().toArray()));
         } finally {
             nodesLock.writeLock().unlock();
+        }
+    }
+
+    @Override
+    public boolean transferMoney(int senderNodeId, int amount) throws RemoteException {
+        itemsLock.writeLock().lock();
+        try {
+            logger.debug("Accepting money amount=" + amount + ", from senderNodeId=" + senderNodeId);
+            node.getItem().incrementBalance(amount);
+            logger.debug("Accepted, new balance=" + node.getItem().getBalance());
+            return true;
+        } finally {
+            itemsLock.writeLock().unlock();
         }
     }
 }

@@ -39,6 +39,10 @@ public final class Node implements Serializable {
     @NotNull
     private final Map<Integer, String> nodes = new HashMap<>();
 
+    public Node() {
+        this(0, "");
+    }
+
     public Node(int id, @NotNull String host) {
         this.id = id;
         this.host = host;
