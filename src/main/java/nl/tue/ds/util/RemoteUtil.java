@@ -2,7 +2,7 @@ package nl.tue.ds.util;
 
 import nl.tue.ds.BankTransfer;
 import nl.tue.ds.entity.Node;
-import nl.tue.ds.rmi.NodeRemote;
+import nl.tue.ds.rmi.NodeServer;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.jetbrains.annotations.NotNull;
@@ -26,9 +26,9 @@ public abstract class RemoteUtil {
      * @return reference to remote object
      */
     @NotNull
-    public static NodeRemote getRemoteNode(@NotNull Node node) {
+    public static NodeServer getRemoteNode(@NotNull Node node) {
         try {
-            return (NodeRemote) Naming.lookup("rmi://" + node.getHost() + "/NodeRemote" + node.getId());
+            return (NodeServer) Naming.lookup("rmi://" + node.getHost() + "/NodeRemote" + node.getId());
         } catch (Exception e) {
             logger.error("Failed to get remote interface for id=" + node.getId(), e);
             throw new RuntimeException("RMI failed miserably", e);

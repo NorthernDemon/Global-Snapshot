@@ -15,8 +15,6 @@ import java.rmi.Naming;
 import java.rmi.RemoteException;
 import java.rmi.registry.LocateRegistry;
 import java.util.Arrays;
-import java.util.LinkedList;
-import java.util.List;
 import java.util.Map;
 
 /**
@@ -37,15 +35,14 @@ public final class ServerLauncher {
     private static NodeState nodeState = NodeState.DISCONNECTED;
 
     /**
-     * Description: method name,node host,node id,existing node host, existing node id
+     * Description: method name,node host,node id,existing node host,existing node id
      * Example: join,localhost,10,none,0
      * Example: join,localhost,15,localhost,10
      * Example: join,localhost,20,localhost,15
      * Example: join,localhost,25,localhost,20
      * Example: join,localhost,20,localhost,25
-     * Example: crash
-     * Example: recover,localhost,20
-     * Example: leave
+     * Example: view
+     * Example: cut
      */
     public static void main(String[] args) {
         logger.info("You can change service configuration parameters in " + ServiceConfiguration.CONFIGURATION_FILE);
@@ -55,16 +52,14 @@ public final class ServerLauncher {
             logger.warn("Bank transfer properties must maintain formula [ MIN_AMOUNT < MAX_AMOUNT < INITIAL_BALANCE ] !");
             return;
         }
-        logger.info("Type in: method name,node host,node id,existing node host, existing node id");
+        logger.info("Type in: method name,node host,node id,existing node host,existing node id");
         logger.info("Example: create,localhost,10");
         logger.info("Example: join,localhost,15,localhost,10");
         logger.info("Example: join,localhost,20,localhost,15");
         logger.info("Example: join,localhost,25,localhost,20");
         logger.info("Example: join,localhost,30,localhost,25");
-        logger.info("Example: crash");
-        logger.info("Example: recover,localhost,20");
-        logger.info("Example: leave");
         logger.info("Example: view");
+        logger.info("Example: cut");
         StorageUtil.init();
         NetworkUtil.printMachineIPv4();
         logger.info("Bank is ready for request >");
@@ -72,7 +67,7 @@ public final class ServerLauncher {
     }
 
     /**
-     * Signals current node to create the ring
+     * Signals current node to create the graph
      *
      * @param nodeHost host for new current node
      * @param nodeId   id for new current node
@@ -87,21 +82,23 @@ public final class ServerLauncher {
             return;
         }
         startRMIRegistry();
-        logger.info("NodeId=" + nodeId + " is the first node in the ring");
+        logger.info("NodeId=" + nodeId + " is the first bank in the graph");
         node = register(nodeId, nodeHost);
         logger.info("NodeId=" + nodeId + " is connected as first node=" + node);
         nodeState = NodeState.CONNECTED;
     }
 
     /**
-     * Signals current node to join the ring and take items that fall into it's responsibility from the successor node
+     * Signals current node to join the graph:
+     * - accumulate the graph structure of all available banks from the existing node
+     * - start randomly sending/accepting money transfers
      * <p>
      * Existing node MUST be operational!
      *
      * @param nodeHost         host for new current node
      * @param nodeId           id for new current node
-     * @param existingNodeHost of node in the ring to fetch data from
-     * @param existingNodeId   of node in the ring to fetch data from
+     * @param existingNodeHost of node in the graph to fetch data from
+     * @param existingNodeId   of node in the graph to fetch data from
      */
     public static void join(@NotNull String nodeHost, int nodeId, @NotNull String existingNodeHost, int existingNodeId) throws Exception {
         if (nodeState != NodeState.DISCONNECTED) {
@@ -131,19 +128,32 @@ public final class ServerLauncher {
     }
 
     /**
+     * View the graph topology aka all the banks in connected component
+     */
+    public static void view() throws RemoteException {
+        if (nodeState != NodeState.CONNECTED) {
+            logger.warn("Must be CONNECTED to view topology! Current nodeState=" + nodeState);
+            return;
+        }
+        logger.info("Viewing topology from node=" + node);
+        for (Map.Entry<Integer, String> entry : node.getNodes().entrySet()) {
+            logger.info(RemoteUtil.getRemoteNode(new Node(entry.getKey(), entry.getValue())).getNode());
+        }
+    }
+
+    /**
+     * Initiate distributed snapshot
+     * <p>
+     * TODO make it happen
      */
     public static void cut() throws RemoteException {
         if (nodeState != NodeState.CONNECTED) {
             logger.warn("Must be CONNECTED to initiate the distributed snapshot! Current nodeState=" + nodeState);
             return;
         }
-        List<Node> nodes = new LinkedList<>();
-        for (Map.Entry<Integer, String> entry : RemoteUtil.getRemoteNode(node).getNodes().entrySet()) {
-            nodes.add(RemoteUtil.getRemoteNode(new Node(entry.getKey(), entry.getValue())).getNode());
-        }
         logger.info("Viewing topology from node=" + node);
-        for (Node node : nodes) {
-            logger.info(node);
+        for (Map.Entry<Integer, String> entry : RemoteUtil.getRemoteNode(node).getNodes().entrySet()) {
+            logger.info(RemoteUtil.getRemoteNode(new Node(entry.getKey(), entry.getValue())).getNode());
         }
     }
 
@@ -174,10 +184,10 @@ public final class ServerLauncher {
     }
 
     /**
-     * Signals current node to leave the ring and pass all it's items to the successor node
+     * Signals current node to leave the graph
      */
     private static void leave() throws Exception {
-        logger.info("NodeId=" + node.getId() + " is disconnecting from the ring...");
+        logger.info("NodeId=" + node.getId() + " is disconnecting from the graph...");
         Naming.unbind("rmi://" + node.getHost() + "/NodeRemote" + node.getId());
         StorageUtil.removeFile(node.getId());
         logger.info("NodeId=" + node.getId() + " disconnected");
@@ -186,7 +196,7 @@ public final class ServerLauncher {
     }
 
     /**
-     * Announce JOIN operation to the nodes in the ring
+     * Announce JOIN operation to the nodes in the graph
      */
     private static void announceJoin() throws RemoteException {
         logger.debug("Announcing join to nodes=" + Arrays.toString(node.getNodes().entrySet().toArray()));

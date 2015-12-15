@@ -10,7 +10,6 @@ import java.io.PrintWriter;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
-import java.util.Collection;
 
 /**
  * Convenient class to work with Node's internal list of snapshots
@@ -33,16 +32,11 @@ public abstract class StorageUtil {
      */
     public static void write(@NotNull Node node) {
         try (PrintWriter writer = new PrintWriter(getFileName(node.getId()), "UTF-8")) {
-            writeItems(writer, node.getItems().values());
+            Item item = node.getItem();
+            writer.write(item.getSnapshotID() + SEPARATOR + item.getBalance() + SEPARATOR + item.getMoneyInTransfer() + System.getProperty("line.separator"));
+            logger.debug("Storage wrote an item=" + item);
         } catch (Exception e) {
             logger.error("Failed to write items from node=" + node, e);
-        }
-    }
-
-    private static void writeItems(@NotNull PrintWriter writer, @NotNull Collection<Item> items) {
-        for (Item item : items) {
-            writer.write(item.getKey() + SEPARATOR + item.getValue() + SEPARATOR + item.getVersion() + System.getProperty("line.separator"));
-            logger.debug("Storage wrote an item=" + item);
         }
     }
 

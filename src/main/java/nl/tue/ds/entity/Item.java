@@ -1,65 +1,71 @@
 package nl.tue.ds.entity;
 
 import com.google.common.base.MoreObjects;
-import org.jetbrains.annotations.NotNull;
 
 import java.io.Serializable;
 import java.util.Objects;
 
 /**
- * Items are put in the ring under the responsible node (NodeId >= itemKey) and replicated to N successors
+ * Items represent an instance of distributed snapshot and associated to nodes by one-to-one relation
  *
  * @see Node
  */
 public final class Item implements Serializable {
 
     /**
-     * Positive integer to determine responsible node in the ring
+     * Sequential number, current snapshot ID to be taken
      */
-    private final int key;
+    private int snapshotID;
 
     /**
-     * Item value without commas
+     * Current amount of money at the bank
      */
-    @NotNull
-    private String value;
+    private int balance;
 
     /**
-     * Used in replication to determine the latest item, starts from 1 and up
+     * All money transfers from incoming channels upon receiving the marker
      */
-    private int version;
+    private int moneyInTransfer;
 
-    public Item(int key, @NotNull String value, int version) {
-        this.key = key;
-        this.value = value;
-        this.version = version;
+    public Item() {
     }
 
-    public Item(int key, @NotNull String value) {
-        this(key, value, 1);
+    public Item(int snapshotID, int balance, int moneyInTransfer) {
+        this.snapshotID = snapshotID;
+        this.balance = balance;
+        this.moneyInTransfer = moneyInTransfer;
     }
 
     /**
-     * Updates value and increase version by 1
-     *
-     * @param value new item value
+     * Initiate new snapshot
      */
-    public void update(@NotNull String value) {
-        this.value = value;
-        this.version++;
+    public void createNewItem() {
+        snapshotID++;
+        moneyInTransfer = 0;
     }
 
-    public int getKey() {
-        return key;
+    public int getSnapshotID() {
+        return snapshotID;
     }
 
-    @NotNull
-    public String getValue() {
-        return value;
+    public int getBalance() {
+        return balance;
     }
 
-    public int getVersion() {
-        return version;
+    public void incrementBalance(int balance) {
+        this.balance += balance;
+    }
+
+    public void decrementBalance(int balance) {
+        this.balance -= balance;
+    }
+
+    public int getMoneyInTransfer() {
+        return moneyInTransfer;
+    }
+
+    public void incrementMoneyInTransfer(int moneyInTransfer) {
+        this.moneyInTransfer += moneyInTransfer;
     }
 
     @Override
@@ -70,8 +76,8 @@ public final class Item implements Serializable {
         if (o instanceof Item) {
             Item object = (Item) o;
 
-            return Objects.equals(key, object.key) &&
-                    Objects.equals(version, object.version);
+            return Objects.equals(snapshotID, object.snapshotID) &&
+                    Objects.equals(balance, object.balance);
         }
 
         return false;
@@ -79,15 +85,15 @@ public final class Item implements Serializable {
 
     @Override
     public int hashCode() {
-        return Objects.hash(key, version);
+        return Objects.hash(snapshotID, balance);
     }
 
     @Override
     public String toString() {
         return MoreObjects.toStringHelper(this)
-                .add("key", key)
-                .add("value", value)
-                .add("version", version)
+                .add("snapshotID", snapshotID)
+                .add("balance", balance)
+                .add("moneyInTransfer", moneyInTransfer)
                 .toString();
     }
 }

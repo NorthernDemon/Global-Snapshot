@@ -2,6 +2,8 @@ package nl.tue.ds;
 
 /**
  * Holds bank transfer properties defined in "service.configuration"
+ * <p>
+ * NOTE: Properties must maintain formula [ MIN_AMOUNT < MAX_AMOUNT < INITIAL_BALANCE ] !
  *
  * @see ServiceConfiguration
  */

@@ -7,15 +7,14 @@ import java.io.Serializable;
 import java.util.*;
 
 /**
- * Nodes are put in the ring in acceding order (with the most greatest id followed by the most lowest id, forming a ring)
- * Nodes store items, such that (NodeId >= itemKey) and replicas of N predecessor's node items
- *
- * @see Item
+ * Nodes are represented as banks in distributed environment and are interconnected in peer-to-peer fashion
+ * <p>
+ * Nodes form a digraph, consisting of one strongly connected component
  */
 public final class Node implements Serializable {
 
     /**
-     * Positive integer to determine position in the ring
+     * Positive integer to determine position in the graph
      */
     private final int id;
 
@@ -26,12 +25,10 @@ public final class Node implements Serializable {
     private final String host;
 
     /**
-     * Own items, for which the node is responsible for
-     * <p>
-     * Map<ItemKey, Item>
+     * Current state of the bank, used to compute distributed snapshot
      */
     @NotNull
-    private final Map<Integer, Item> items = new TreeMap<>();
+    private final Item item;
 
     /**
      * All known nodes in the graph, including itself
@@ -44,15 +41,17 @@ public final class Node implements Serializable {
     public Node(int id, @NotNull String host) {
         this.id = id;
         this.host = host;
+        item = new Item();
         nodes.put(id, host);
     }
 
-    public Node() {
-        this(0, "");
+    public int getId() {
+        return id;
     }
 
-    public Node(@NotNull Node node) {
-        this(node.id, node.host);
+    @NotNull
+    public Item getItem() {
+        return item;
     }
 
     public void putNodes(@NotNull Map<Integer, String> nodes) {
@@ -63,21 +62,9 @@ public final class Node implements Serializable {
         nodes.put(id, host);
     }
 
-    public void removeNode(int id) {
-        nodes.remove(id);
-    }
-
-    public int getId() {
-        return id;
-    }
-
     @NotNull
     public String getHost() {
         return host;
-    }
-
-    public Map<Integer, Item> getItems() {
-        return Collections.unmodifiableMap(items);
     }
 
     public Map<Integer, String> getNodes() {
@@ -108,7 +95,7 @@ public final class Node implements Serializable {
         return MoreObjects.toStringHelper(this)
                 .add("id", id)
                 .add("host", host)
-                .add("items", Arrays.toString(items.keySet().toArray()))
+                .add("item", item)
                 .add("nodes", Arrays.toString(nodes.entrySet().toArray()))
                 .toString();
     }
