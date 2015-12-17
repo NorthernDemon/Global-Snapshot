@@ -8,7 +8,7 @@ import java.util.*;
 import java.util.stream.Collectors;
 
 /**
- * Distributed Snapshot associated with node
+ * Distributed Snapshot associated with the node
  *
  * @see Node
  */
@@ -38,11 +38,11 @@ public final class Snapshot implements Serializable {
      */
     private final @NotNull Set<Integer> unrecordedNodes = new HashSet<>();
 
-    public void startSnapshotRecording(int balance, Map<Integer, String> nodes) {
+    public void startSnapshotRecording(int nodeId, int balance, Map<Integer, String> nodes) {
         id++;
         localBalance = balance;
         moneyInTransfer = 0;
-        unrecordedNodes.addAll(nodes.entrySet().stream().map(Map.Entry::getKey).collect(Collectors.toList()));
+        unrecordedNodes.addAll(nodes.entrySet().stream().filter(n -> n.getKey() != nodeId).map(Map.Entry::getKey).collect(Collectors.toList()));
     }
 
     public int getId() {
@@ -57,6 +57,12 @@ public final class Snapshot implements Serializable {
         return moneyInTransfer;
     }
 
+    /**
+     * Increments the money-in-transfer upon receiving the marker from that node
+     *
+     * @param nodeId sender of the money transfer
+     * @param amount of the money transfer
+     */
     public void incrementMoneyInTransfer(int nodeId, int amount) {
         if (unrecordedNodes.contains(nodeId)) {
             moneyInTransfer += amount;

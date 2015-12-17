@@ -9,9 +9,6 @@ import org.jetbrains.annotations.NotNull;
 
 import java.rmi.Naming;
 import java.rmi.RemoteException;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Random;
 
 /**
  * Convenient class to deal with RMI for nodes
@@ -38,22 +35,6 @@ public abstract class RemoteUtil {
                 logger.error("Failed to get Null Node Pattern", re);
                 throw new RuntimeException("RMI failed miserably", re);
             }
-        }
-    }
-
-    /**
-     * Gets node given nodeId
-     *
-     * @param currentNode current node
-     * @return currentNode if nodeId is the same, remote node otherwise
-     */
-    public static Node getRandomNode(@NotNull Node currentNode) throws RemoteException {
-        List<Integer> keysAsArray = new ArrayList<>(currentNode.getNodes().keySet());
-        int nodeId = keysAsArray.get(new Random().nextInt(currentNode.getNodes().size()));
-        if (nodeId == currentNode.getId()) {
-            return null;
-        } else {
-            return getRemoteNode(new Node(nodeId, currentNode.getNodes().get(nodeId))).getNode();
         }
     }
 }

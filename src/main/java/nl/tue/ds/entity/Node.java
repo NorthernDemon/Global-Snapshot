@@ -71,8 +71,11 @@ public final class Node implements Serializable {
         return snapshot;
     }
 
+    /**
+     * Starts distributed snapshot by capturing local balance and waiting for marker from other nodes
+     */
     public void startSnapshotRecording() {
-        snapshot.startSnapshotRecording(item.getBalance(), nodes);
+        snapshot.startSnapshotRecording(id, item.getBalance(), nodes);
     }
 
     public void putNodes(@NotNull Map<Integer, String> nodes) {

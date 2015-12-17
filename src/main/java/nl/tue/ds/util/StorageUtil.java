@@ -6,6 +6,8 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.jetbrains.annotations.NotNull;
 
+import java.io.BufferedWriter;
+import java.io.FileWriter;
 import java.io.PrintWriter;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -31,12 +33,12 @@ public abstract class StorageUtil {
      * @param node to write
      */
     public static void write(@NotNull Node node) {
-        try (PrintWriter writer = new PrintWriter(getFileName(node.getId()), "UTF-8")) {
+        try (PrintWriter writer = new PrintWriter(new BufferedWriter(new FileWriter(getFileName(node.getId()), true)))) {
             @NotNull Snapshot snapshot = node.getSnapshot();
-            writer.write(snapshot.getId() + SEPARATOR + snapshot.getLocalBalance() + SEPARATOR + snapshot.getMoneyInTransfer() + System.getProperty("line.separator"));
-            logger.debug("Storage wrote an snapshot=" + snapshot);
+            writer.println(snapshot.getId() + SEPARATOR + snapshot.getLocalBalance() + SEPARATOR + snapshot.getMoneyInTransfer());
+            logger.debug("Storage wrote a snapshot=" + snapshot);
         } catch (Exception e) {
-            logger.error("Failed to write snapshot from node=" + node, e);
+            logger.error("Failed to write snapshot of node=" + node, e);
         }
     }
 

@@ -11,7 +11,8 @@ import org.jetbrains.annotations.NotNull;
 import java.rmi.RemoteException;
 import java.rmi.server.UnicastRemoteObject;
 import java.util.Arrays;
-import java.util.Map;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 import java.util.concurrent.locks.ReadWriteLock;
 import java.util.concurrent.locks.ReentrantReadWriteLock;
 
@@ -76,10 +77,10 @@ public final class NodeRemote extends UnicastRemoteObject implements NodeServer 
     public boolean transferMoney(int senderNodeId, int amount) throws RemoteException {
         itemsLock.writeLock().lock();
         try {
-            logger.debug("Accepting money amount=" + amount + ", from senderNodeId=" + senderNodeId);
+            logger.trace("Accepting money amount=" + amount + ", from senderNodeId=" + senderNodeId);
             node.getItem().incrementBalance(amount);
             node.getSnapshot().incrementMoneyInTransfer(senderNodeId, amount);
-            logger.debug("Accepted, new balance=" + node.getItem().getBalance());
+            logger.trace("Accepted, new balance=" + node.getItem().getBalance());
             return true;
         } finally {
             itemsLock.writeLock().unlock();
@@ -94,16 +95,22 @@ public final class NodeRemote extends UnicastRemoteObject implements NodeServer 
             @NotNull Snapshot snapshot = node.getSnapshot();
             if (!snapshot.isRecording()) {
                 node.startSnapshotRecording();
-                logger.info("Broadcasting marker to neighbours...");
-                for (Map.Entry<Integer, String> entry : node.getNodes().entrySet()) {
-                    if (entry.getKey() != node.getId()) {
-                        RemoteUtil.getRemoteNode(new Node(entry.getKey(), entry.getValue())).sendMarker(node.getId());
-                        logger.info("Marker sent to nodeId=" + entry.getKey());
-                    }
-                }
+                logger.debug("Broadcasting marker to neighbours " + Arrays.toString(node.getNodes().entrySet().toArray()));
+                ExecutorService executorService = Executors.newFixedThreadPool(node.getNodes().size() - 1);
+                node.getNodes().entrySet().stream().filter(entry -> entry.getKey() != node.getId()).forEach(entry -> {
+                    executorService.execute(() -> {
+                        try {
+                            RemoteUtil.getRemoteNode(new Node(entry.getKey(), entry.getValue())).sendMarker(node.getId());
+                            logger.debug("Marker sent to nodeId=" + entry.getKey());
+                        } catch (RemoteException e) {
+                            logger.error("Failed to sent marker to nodeId=" + entry.getKey(), e);
+                        }
+                    });
+                });
             }
             snapshot.markRecorded(nodeId);
             if (!snapshot.isRecording()) {
+                logger.debug("Received all markers for snapshot on nodeId=" + nodeId);
                 StorageUtil.write(node);
             }
         } finally {
