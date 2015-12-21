@@ -100,7 +100,7 @@ public final class NodeRemote extends UnicastRemoteObject implements NodeServer 
                 node.getNodes().entrySet().stream().filter(entry -> entry.getKey() != node.getId()).forEach(entry -> {
                     executorService.execute(() -> {
                         try {
-                            RemoteUtil.getRemoteNode(new Node(entry.getKey(), entry.getValue())).sendMarker(node.getId());
+                            RemoteUtil.getRemoteNode(entry.getKey(), entry.getValue()).sendMarker(node.getId());
                             logger.debug("Marker sent to nodeId=" + entry.getKey());
                         } catch (RemoteException e) {
                             logger.error("Failed to sent marker to nodeId=" + entry.getKey(), e);

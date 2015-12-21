@@ -121,7 +121,7 @@ public final class ServerLauncher {
         }
         startRMIRegistry();
         logger.info("NodeId=" + nodeId + " connects to existing nodeId=" + existingNodeId);
-        Node existingNode = RemoteUtil.getRemoteNode(new Node(existingNodeId, existingNodeHost)).getNode();
+        Node existingNode = RemoteUtil.getRemoteNode(existingNodeId, existingNodeHost).getNode();
         if (existingNode.getNodes().isEmpty()) {
             logger.warn("Existing node must be operational!");
             return;

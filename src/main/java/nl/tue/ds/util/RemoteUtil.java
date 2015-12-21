@@ -25,10 +25,22 @@ public abstract class RemoteUtil {
      */
     @NotNull
     public static NodeServer getRemoteNode(@NotNull Node node) {
+        return getRemoteNode(node.getId(), node.getHost());
+    }
+
+    /**
+     * Get reference to remote node
+     *
+     * @param id   of the node
+     * @param host of the node
+     * @return reference to remote object
+     */
+    @NotNull
+    public static NodeServer getRemoteNode(int id, @NotNull String host) {
         try {
-            return (NodeServer) Naming.lookup("rmi://" + node.getHost() + "/NodeRemote" + node.getId());
+            return (NodeServer) Naming.lookup("rmi://" + host + "/NodeRemote" + id);
         } catch (Exception e) {
-            logger.error("Failed to get remote interface for id=" + node.getId(), e);
+            logger.error("Failed to get remote interface for id=" + id, e);
             try {
                 return new NullNodeRemote(new Node());
             } catch (RemoteException re) {
