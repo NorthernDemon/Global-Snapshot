@@ -37,10 +37,6 @@ Configure service parameters in **service.properties** file.
     - execute following line in new window to start the node (bank):
         - java -jar GlobalSnapshot-${version}-jar-with-dependencies.jar
 
-Architecture Diagram
--------
-![Diagram](/diagrams/Architecture_Diagram.png)
-
 Documentation
 -------
 [Project Description (PDF)](/docs/Project_Description.pdf)
