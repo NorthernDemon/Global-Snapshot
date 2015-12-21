@@ -42,7 +42,7 @@ public final class Snapshot implements Serializable {
         id++;
         localBalance = balance;
         moneyInTransfer = 0;
-        unrecordedNodes.addAll(nodes.entrySet().stream().filter(n -> n.getKey() != nodeId).map(Map.Entry::getKey).collect(Collectors.toList()));
+        unrecordedNodes.addAll(nodes.entrySet().parallelStream().filter(n -> n.getKey() != nodeId).map(Map.Entry::getKey).collect(Collectors.toList()));
     }
 
     public int getId() {

@@ -95,9 +95,9 @@ public final class NodeRemote extends UnicastRemoteObject implements NodeServer 
             @NotNull Snapshot snapshot = node.getSnapshot();
             if (!snapshot.isRecording()) {
                 node.startSnapshotRecording();
-                logger.debug("Broadcasting marker to neighbours " + Arrays.toString(node.getNodes().entrySet().toArray()));
+                logger.debug("Broadcasting marker to neighbours");
                 ExecutorService executorService = Executors.newFixedThreadPool(node.getNodes().size() - 1);
-                node.getNodes().entrySet().stream().filter(entry -> entry.getKey() != node.getId()).forEach(entry -> {
+                node.getNodes().entrySet().stream().filter(n -> n.getKey() != node.getId()).forEach(entry -> {
                     executorService.execute(() -> {
                         try {
                             RemoteUtil.getRemoteNode(entry.getKey(), entry.getValue()).sendMarker(node.getId());

@@ -1,6 +1,5 @@
 package nl.tue.ds;
 
-import nl.tue.ds.entity.Item;
 import nl.tue.ds.entity.Node;
 import nl.tue.ds.rmi.NodeRemote;
 import nl.tue.ds.util.InputUtil;
@@ -15,10 +14,12 @@ import org.jetbrains.annotations.Nullable;
 import java.rmi.Naming;
 import java.rmi.RemoteException;
 import java.rmi.registry.LocateRegistry;
-import java.util.*;
+import java.util.Arrays;
+import java.util.Random;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
+import java.util.stream.Collectors;
 
 /**
  * Simulates server node (bank) in the graph for distributed snapshot
@@ -147,9 +148,13 @@ public final class ServerLauncher {
             return;
         }
         logger.info("Viewing topology from node=" + node);
-        for (Map.Entry<Integer, String> entry : node.getNodes().entrySet()) {
-            logger.info(RemoteUtil.getRemoteNode(new Node(entry.getKey(), entry.getValue())).getNode());
-        }
+        node.getNodes().entrySet().forEach(n -> {
+            try {
+                RemoteUtil.getRemoteNode(n.getKey(), n.getValue()).getNode();
+            } catch (RemoteException e) {
+                throw new RuntimeException(e);
+            }
+        });
     }
 
     /**
@@ -207,12 +212,14 @@ public final class ServerLauncher {
      */
     private static void announceJoin() throws RemoteException {
         logger.debug("Announcing join to nodes=" + Arrays.toString(node.getNodes().entrySet().toArray()));
-        for (Map.Entry<Integer, String> entry : node.getNodes().entrySet()) {
-            if (entry.getKey() != node.getId()) {
-                RemoteUtil.getRemoteNode(new Node(entry.getKey(), entry.getValue())).addNode(node.getId(), node.getHost());
-                logger.trace("Announced join to nodeId=" + entry.getKey());
+        node.getNodes().entrySet().parallelStream().filter(n -> n.getKey() != node.getId()).forEach(n -> {
+            try {
+                RemoteUtil.getRemoteNode(n.getKey(), n.getValue()).addNode(node.getId(), node.getHost());
+                logger.trace("Announced join to nodeId=" + n.getKey());
+            } catch (RemoteException e) {
+                throw new RuntimeException(e);
             }
-        }
+        });
     }
 
     private static void startMoneyTransferring() {
