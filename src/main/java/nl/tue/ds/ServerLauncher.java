@@ -225,21 +225,18 @@ public final class ServerLauncher {
     private static void startMoneyTransferring() {
         executor.scheduleAtFixedRate((Runnable) () -> {
             try {
-                if (node.getNodes().size() > 1) {
-                    Node randomNode = getRandomNode(ServerLauncher.node);
-                    if (randomNode != null) {
-                        @NotNull Item item = node.getItem();
-                        int randomAmount = new Random().nextInt(BankTransfer.MAX_AMOUNT) + BankTransfer.MIN_AMOUNT;
-                        boolean isDecremented = item.decrementBalance(randomAmount);
-                        if (isDecremented) {
-                            logger.trace("Transferring money amount=" + randomAmount + ", to nodeId=" + randomNode.getId());
-                            boolean isTransferred = RemoteUtil.getRemoteNode(randomNode).transferMoney(node.getId(), randomAmount);
-                            if (!isTransferred) {
-                                item.incrementBalance(randomAmount);
-                                logger.trace("NOT Transferred, restore balance=" + node.getItem().getBalance());
-                            } else {
-                                logger.trace("Transferred, new balance=" + node.getItem().getBalance());
-                            }
+                if (node != null && node.getNodes().size() > 1) {
+                    int randomAmount = new Random().nextInt(BankTransfer.MAX_AMOUNT + 1) + BankTransfer.MIN_AMOUNT;
+                    boolean isDecremented = node.getItem().decrementBalance(randomAmount);
+                    if (isDecremented) {
+                        Node randomNode = getRandomNode();
+                        logger.trace("Transferring money amount=" + randomAmount + ", to nodeId=" + randomNode.getId());
+                        boolean isTransferred = RemoteUtil.getRemoteNode(randomNode).transferMoney(node.getId(), randomAmount);
+                        if (!isTransferred) {
+                            node.getItem().incrementBalance(randomAmount);
+                            logger.trace("NOT Transferred, restore balance=" + node.getItem().getBalance());
+                        } else {
+                            logger.trace("Transferred, new balance=" + node.getItem().getBalance());
                         }
                     }
                 }
@@ -252,17 +249,12 @@ public final class ServerLauncher {
     /**
      * Gets node given nodeId
      *
-     * @param currentNode current node
      * @return currentNode if nodeId is the same, remote node otherwise
      */
-    public static Node getRandomNode(@NotNull Node currentNode) {
-        List<Integer> keysAsArray = new ArrayList<>(currentNode.getNodes().keySet());
-        int nodeId = keysAsArray.get(new Random().nextInt(currentNode.getNodes().size()));
-        if (nodeId == currentNode.getId()) {
-            return null;
-        } else {
-            return new Node(nodeId, currentNode.getNodes().get(nodeId));
-        }
+    private static Node getRandomNode() {
+        int index = new Random().nextInt(node.getNodes().size() - 1);
+        int nodeId = node.getNodes().keySet().parallelStream().filter(n -> n != node.getId()).collect(Collectors.toList()).get(index);
+        return new Node(nodeId, node.getNodes().get(nodeId));
     }
 
     /**
