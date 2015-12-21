@@ -5,6 +5,8 @@ import org.jetbrains.annotations.NotNull;
 
 import java.io.Serializable;
 import java.util.*;
+import java.util.concurrent.locks.ReadWriteLock;
+import java.util.concurrent.locks.ReentrantReadWriteLock;
 import java.util.stream.Collectors;
 
 /**
@@ -28,6 +30,11 @@ public final class Snapshot implements Serializable {
      * All money transfers from incoming channels upon receiving the marker
      */
     private int moneyInTransfer;
+
+    /**
+     * Locks operations over the channels
+     */
+    private static final ReadWriteLock channelLock = new ReentrantReadWriteLock();
 
     /**
      * Incoming nodes to be recorded for distributed snapshot
@@ -64,17 +71,32 @@ public final class Snapshot implements Serializable {
      * @param amount of the money transfer
      */
     public void incrementMoneyInTransfer(int nodeId, int amount) {
-        if (unrecordedNodes.contains(nodeId)) {
-            moneyInTransfer += amount;
+        channelLock.writeLock().lock();
+        try {
+            if (unrecordedNodes.contains(nodeId)) {
+                moneyInTransfer += amount;
+            }
+        } finally {
+            channelLock.writeLock().unlock();
         }
     }
 
     public void markRecorded(int nodeId) {
-        unrecordedNodes.remove(nodeId);
+        channelLock.writeLock().lock();
+        try {
+            unrecordedNodes.remove(nodeId);
+        } finally {
+            channelLock.writeLock().unlock();
+        }
     }
 
     public boolean isRecording() {
-        return unrecordedNodes.size() != 0;
+        channelLock.writeLock().lock();
+        try {
+            return unrecordedNodes.size() != 0;
+        } finally {
+            channelLock.writeLock().unlock();
+        }
     }
 
     @Override
