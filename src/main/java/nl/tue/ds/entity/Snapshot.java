@@ -91,11 +91,11 @@ public final class Snapshot implements Serializable {
     }
 
     public boolean isRecording() {
-        channelLock.writeLock().lock();
+        channelLock.readLock().lock();
         try {
             return unrecordedNodes.size() != 0;
         } finally {
-            channelLock.writeLock().unlock();
+            channelLock.readLock().unlock();
         }
     }
 

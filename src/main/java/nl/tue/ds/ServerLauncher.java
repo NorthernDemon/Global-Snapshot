@@ -227,16 +227,16 @@ public final class ServerLauncher {
             try {
                 if (node != null && node.getNodes().size() > 1) {
                     int randomAmount = new Random().nextInt(BankTransfer.MAX_AMOUNT + 1) + BankTransfer.MIN_AMOUNT;
-                    boolean isDecremented = node.getItem().decrementBalance(randomAmount);
+                    boolean isDecremented = RemoteUtil.getRemoteNode(node).withdrawMoney(randomAmount);
                     if (isDecremented) {
                         Node randomNode = getRandomNode();
                         logger.trace("Transferring money amount=" + randomAmount + ", to nodeId=" + randomNode.getId());
                         boolean isTransferred = RemoteUtil.getRemoteNode(randomNode).transferMoney(node.getId(), randomAmount);
-                        if (!isTransferred) {
-                            node.getItem().incrementBalance(randomAmount);
-                            logger.trace("NOT Transferred, restore balance=" + node.getItem().getBalance());
-                        } else {
+                        if (isTransferred) {
                             logger.trace("Transferred, new balance=" + node.getItem().getBalance());
+                        } else {
+                            RemoteUtil.getRemoteNode(node).restoreMoney();
+                            logger.trace("NOT Transferred, restore balance=" + node.getItem().getBalance());
                         }
                     }
                 }

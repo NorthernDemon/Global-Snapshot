@@ -17,5 +17,9 @@ public interface NodeServer extends Remote {
 
     boolean transferMoney(int senderNodeId, int amount) throws RemoteException;
 
+    boolean withdrawMoney(int amount) throws RemoteException;
+
+    void restoreMoney() throws RemoteException;
+
     void sendMarker(int nodeId) throws RemoteException;
 }

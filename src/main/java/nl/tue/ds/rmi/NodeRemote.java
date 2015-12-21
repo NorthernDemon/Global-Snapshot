@@ -88,6 +88,33 @@ public final class NodeRemote extends UnicastRemoteObject implements NodeServer 
     }
 
     @Override
+    public boolean withdrawMoney(int amount) throws RemoteException {
+        itemLock.writeLock().lock();
+        try {
+            boolean isWithdraw = node.getItem().decrementBalance(amount);
+            if (isWithdraw) {
+                logger.trace("Withdraw money amount=" + amount);
+            } else {
+                logger.trace("NOT Withdraw money amount=" + amount);
+            }
+            return isWithdraw;
+        } finally {
+            itemLock.writeLock().unlock();
+        }
+    }
+
+    @Override
+    public void restoreMoney() throws RemoteException {
+        itemLock.writeLock().lock();
+        try {
+            node.getItem().restoreBalance();
+            logger.trace("Restored money amount to balance=" + node.getItem().getBalance());
+        } finally {
+            itemLock.writeLock().unlock();
+        }
+    }
+
+    @Override
     public void sendMarker(int nodeId) throws RemoteException {
         markerLock.writeLock().lock();
         try {

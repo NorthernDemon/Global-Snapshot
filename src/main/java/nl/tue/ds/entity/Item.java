@@ -17,6 +17,12 @@ public final class Item implements Serializable {
      */
     private int balance;
 
+    /**
+     * Temp variable for holding withdraw money amount with possibility to restore
+     * holds under assumption that only one money transfer is done at a time
+     */
+    private int withdrawAmount;
+
     public Item(int balance) {
         this.balance = balance;
     }
@@ -29,6 +35,11 @@ public final class Item implements Serializable {
         balance += amount;
     }
 
+    public void restoreBalance() {
+        balance += withdrawAmount;
+        withdrawAmount = 0;
+    }
+
     /**
      * Checks if current balance is over or equal the amount to be deducted
      * if it is -> deducts the money, if not -> balance stay untouched
@@ -39,6 +50,7 @@ public final class Item implements Serializable {
     public boolean decrementBalance(int amount) {
         if (balance >= amount) {
             balance -= amount;
+            withdrawAmount = amount;
             return true;
         }
         return false;
