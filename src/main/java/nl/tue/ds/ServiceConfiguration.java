@@ -24,6 +24,10 @@ public abstract class ServiceConfiguration {
 
     private static int bankTransferMaxAmount;
 
+    private static int bankTransferTimeoutFrequency;
+
+    private static String bankTransferTimeoutUnit;
+
     static {
         try {
             Properties properties = new Properties();
@@ -32,6 +36,8 @@ public abstract class ServiceConfiguration {
             bankInitialAmount = Integer.parseInt(properties.getProperty("bank-initial-amount"));
             bankTransferMinAmount = Integer.parseInt(properties.getProperty("bank-transfer-min-amount"));
             bankTransferMaxAmount = Integer.parseInt(properties.getProperty("bank-transfer-max-amount"));
+            bankTransferTimeoutFrequency = Integer.parseInt(properties.getProperty("bank-transfer-timeout-frequency"));
+            bankTransferTimeoutUnit = properties.getProperty("bank-transfer-timeout-unit");
         } catch (IOException e) {
             logger.error("Failed to load service configuration!", e);
         }
@@ -51,5 +57,13 @@ public abstract class ServiceConfiguration {
 
     public static int getBankTransferMaxAmount() {
         return bankTransferMaxAmount;
+    }
+
+    public static int getBankTransferTimeoutFrequency() {
+        return bankTransferTimeoutFrequency;
+    }
+
+    public static String getBankTransferTimeoutUnit() {
+        return bankTransferTimeoutUnit;
     }
 }

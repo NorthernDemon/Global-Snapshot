@@ -56,6 +56,7 @@ public final class ServerLauncher {
         logger.info("You can change service configuration parameters in " + ServiceConfiguration.CONFIGURATION_FILE);
         logger.info("Service configuration: RMI port=" + RMI_PORT);
         logger.info("Service configuration: BankTransfer MIN_AMOUNT=" + BankTransfer.MIN_AMOUNT + ", MAX_AMOUNT=" + BankTransfer.MAX_AMOUNT + ", INITIAL_BALANCE=" + BankTransfer.INITIAL_BALANCE);
+        logger.info("Service configuration: BankTransfer TIMEOUT_FREQUENCY=" + BankTransfer.TIMEOUT_FREQUENCY + ", TIMEOUT_UNIT=" + BankTransfer.TIMEOUT_UNIT);
         if (BankTransfer.MIN_AMOUNT >= BankTransfer.MAX_AMOUNT || BankTransfer.MAX_AMOUNT >= BankTransfer.INITIAL_BALANCE) {
             logger.warn("Bank transfer properties must maintain formula [ MIN_AMOUNT < MAX_AMOUNT < INITIAL_BALANCE ] !");
             return;
@@ -238,7 +239,7 @@ public final class ServerLauncher {
             } catch (RemoteException e) {
                 logger.error("Failed to fetch random node!", e);
             }
-        }, 0, 1000, TimeUnit.MILLISECONDS);
+        }, 0, BankTransfer.TIMEOUT_FREQUENCY, TimeUnit.valueOf(BankTransfer.TIMEOUT_UNIT));
     }
 
     /**

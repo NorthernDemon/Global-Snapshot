@@ -23,4 +23,14 @@ public interface BankTransfer {
      * Maximal amount to transfer
      */
     int MAX_AMOUNT = ServiceConfiguration.getBankTransferMaxAmount();
+
+    /**
+     * Frequency of money transfers
+     */
+    int TIMEOUT_FREQUENCY = ServiceConfiguration.getBankTransferTimeoutFrequency();
+
+    /**
+     * Unit of money transfers
+     */
+    String TIMEOUT_UNIT = ServiceConfiguration.getBankTransferTimeoutUnit();
 }
