@@ -166,7 +166,7 @@ public final class ServerLauncher {
             return;
         }
         logger.info("Starting distributed snapshot from node=" + node);
-        RemoteUtil.getRemoteNode(node).sendMarker(node.getId());
+        RemoteUtil.getRemoteNode(node).receiveMarker(node.getId());
     }
 
     /**

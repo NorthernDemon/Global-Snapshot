@@ -60,12 +60,24 @@ public final class Snapshot implements Serializable {
     /**
      * Increments the money-in-transfer upon receiving the marker from that node
      *
-     * @param nodeId sender of the money transfer
-     * @param amount of the money transfer
+     * @param recipientNodeId recipient of the money transfer
+     * @param amount          of the money transfer
      */
-    public void incrementMoneyInTransfer(int nodeId, int amount) {
-        if (unrecordedNodes.contains(nodeId)) {
+    public void incrementMoneyInTransfer(int recipientNodeId, int amount) {
+        if (unrecordedNodes.contains(recipientNodeId)) {
             moneyInTransfer += amount;
+        }
+    }
+
+    /**
+     * Decrements the money-in-transfer upon receiving the marker from that node
+     *
+     * @param recipientNodeId recipient of the money transfer
+     * @param amount          of the money transfer
+     */
+    public void decrementMoneyInTransfer(int recipientNodeId, int amount) {
+        if (unrecordedNodes.contains(recipientNodeId)) {
+            moneyInTransfer -= amount;
         }
     }
 

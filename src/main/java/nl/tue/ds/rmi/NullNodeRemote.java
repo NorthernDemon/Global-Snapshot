@@ -33,11 +33,14 @@ public final class NullNodeRemote extends UnicastRemoteObject implements NodeSer
     }
 
     @Override
-    public boolean acceptMoney(int senderNodeId, int amount) throws RemoteException {
-        return false;
+    public void acceptMoney(int senderNodeId, int amount) throws RemoteException {
     }
 
     @Override
-    public void sendMarker(int nodeId) throws RemoteException {
+    public void transferredMoney(int recipientNodeId, int amount, boolean isSuccess) throws RemoteException {
+    }
+
+    @Override
+    public void receiveMarker(int nodeId) throws RemoteException {
     }
 }
