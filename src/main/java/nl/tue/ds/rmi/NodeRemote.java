@@ -3,7 +3,6 @@ package nl.tue.ds.rmi;
 import nl.tue.ds.entity.Node;
 import nl.tue.ds.entity.Snapshot;
 import nl.tue.ds.util.RemoteUtil;
-import nl.tue.ds.util.StorageUtil;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.jetbrains.annotations.NotNull;
@@ -153,7 +152,7 @@ public final class NodeRemote extends UnicastRemoteObject implements NodeServer 
             snapshot.markRecorded(nodeId);
             if (!snapshot.isRecording()) {
                 logger.debug("Received all markers for snapshot on nodeId=" + nodeId);
-                StorageUtil.write(node);
+                node.stopSnapshotRecording();
             }
         } finally {
             markerLock.writeLock().unlock();

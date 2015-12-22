@@ -2,6 +2,7 @@ package nl.tue.ds.entity;
 
 import com.google.common.base.MoreObjects;
 import nl.tue.ds.BankTransfer;
+import nl.tue.ds.util.StorageUtil;
 import org.jetbrains.annotations.NotNull;
 
 import java.io.Serializable;
@@ -76,6 +77,11 @@ public final class Node implements Serializable {
      */
     public void startSnapshotRecording() {
         snapshot.startSnapshotRecording(id, item.getBalance(), nodes);
+    }
+
+    public void stopSnapshotRecording() {
+        snapshot.stopSnapshotRecording();
+        StorageUtil.write(this);
     }
 
     public void putNodes(@NotNull Map<Integer, String> nodes) {
