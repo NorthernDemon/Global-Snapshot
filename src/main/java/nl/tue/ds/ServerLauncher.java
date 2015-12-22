@@ -226,22 +226,12 @@ public final class ServerLauncher {
         executor.scheduleAtFixedRate((Runnable) () -> {
             try {
                 if (node != null && node.getNodes().size() > 1) {
+                    Node randomNode = getRandomNode();
                     int randomAmount = new Random().nextInt(BankTransfer.MAX_AMOUNT + 1) + BankTransfer.MIN_AMOUNT;
-                    boolean isDecremented = RemoteUtil.getRemoteNode(node).withdrawMoney(randomAmount);
-                    if (isDecremented) {
-                        Node randomNode = getRandomNode();
-                        logger.trace("Transferring money amount=" + randomAmount + ", to nodeId=" + randomNode.getId());
-                        boolean isTransferred = RemoteUtil.getRemoteNode(randomNode).transferMoney(node.getId(), randomAmount);
-                        if (isTransferred) {
-                            logger.trace("Transferred, new balance=" + node.getItem().getBalance());
-                        } else {
-                            RemoteUtil.getRemoteNode(node).restoreMoney();
-                            logger.trace("NOT Transferred, restore balance=" + node.getItem().getBalance());
-                        }
-                    }
+                    RemoteUtil.getRemoteNode(node).transferMoney(randomNode.getId(), randomAmount);
                 }
             } catch (RemoteException e) {
-                logger.error("Failed to fetch random node!", e);
+                logger.error("Failed to transfer to random node!", e);
             }
         }, 0, BankTransfer.TIMEOUT_FREQUENCY, TimeUnit.valueOf(BankTransfer.TIMEOUT_UNIT));
     }
