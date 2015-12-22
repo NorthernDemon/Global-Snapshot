@@ -45,6 +45,11 @@ public final class NodeRemote extends UnicastRemoteObject implements NodeServer 
     /**
      * Locks operations over the item
      */
+    private static final ReadWriteLock itemTransferredLock = new ReentrantReadWriteLock();
+
+    /**
+     * Locks operations over the item
+     */
     private static final ReadWriteLock itemAcceptLock = new ReentrantReadWriteLock();
 
     /**
@@ -81,13 +86,17 @@ public final class NodeRemote extends UnicastRemoteObject implements NodeServer 
     @Override
     public void transferMoney(int recipientNodeId, int amount) throws RemoteException {
         itemTransferLock.writeLock().lock();
-        boolean isWithdraw = node.getItem().decrementBalance(amount);
-        if (isWithdraw) {
-            logger.trace("Transferring amount=" + amount + " to recipientNodeId=" + recipientNodeId);
-            node.getSnapshot().incrementMoneyInTransfer(recipientNodeId, amount);
-            RemoteUtil.getRemoteNode(recipientNodeId, node.getNodes().get(recipientNodeId)).acceptMoney(node.getId(), amount);
-        } else {
-            logger.trace("NOT Withdraw money amount=" + amount);
+        try {
+            boolean isWithdraw = node.getItem().decrementBalance(amount);
+            if (isWithdraw) {
+                logger.trace("Transferring amount=" + amount + " to recipientNodeId=" + recipientNodeId);
+                node.getSnapshot().incrementMoneyInTransfer(recipientNodeId, amount);
+                RemoteUtil.getRemoteNode(recipientNodeId, node.getNodes().get(recipientNodeId)).acceptMoney(node.getId(), amount);
+            } else {
+                logger.trace("NOT Withdraw money amount=" + amount);
+            }
+        } finally {
+            itemTransferLock.writeLock().unlock();
         }
     }
 
@@ -97,8 +106,8 @@ public final class NodeRemote extends UnicastRemoteObject implements NodeServer 
         try {
             logger.trace("Accepting money amount=" + amount + " from senderNodeId=" + senderNodeId);
             node.getItem().incrementBalance(amount);
-            logger.trace("Accepted, new balance=" + node.getItem().getBalance());
             RemoteUtil.getRemoteNode(senderNodeId, node.getNodes().get(senderNodeId)).transferredMoney(node.getId(), amount, true);
+            logger.trace("Accepted, new balance=" + node.getItem().getBalance());
         } finally {
             itemAcceptLock.writeLock().unlock();
         }
@@ -106,6 +115,7 @@ public final class NodeRemote extends UnicastRemoteObject implements NodeServer 
 
     @Override
     public void transferredMoney(int recipientNodeId, int amount, boolean isSuccess) throws RemoteException {
+        itemTransferredLock.writeLock().lock();
         try {
             node.getSnapshot().decrementMoneyInTransfer(recipientNodeId, amount);
             if (isSuccess) {
@@ -115,7 +125,7 @@ public final class NodeRemote extends UnicastRemoteObject implements NodeServer 
                 logger.trace("NOT Transferred amount=" + amount + " to recipientNodeId=" + recipientNodeId);
             }
         } finally {
-            itemTransferLock.writeLock().unlock();
+            itemTransferredLock.writeLock().unlock();
         }
     }
 
