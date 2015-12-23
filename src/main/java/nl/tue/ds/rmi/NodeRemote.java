@@ -44,11 +44,6 @@ public final class NodeRemote extends UnicastRemoteObject implements NodeServer 
     /**
      * Locks operations over the item
      */
-    private static final ReadWriteLock itemTransferredLock = new ReentrantReadWriteLock();
-
-    /**
-     * Locks operations over the item
-     */
     private static final ReadWriteLock itemAcceptLock = new ReentrantReadWriteLock();
 
     /**
@@ -89,8 +84,13 @@ public final class NodeRemote extends UnicastRemoteObject implements NodeServer 
             boolean isWithdraw = node.getItem().decrementBalance(amount);
             if (isWithdraw) {
                 logger.trace("Transferring amount=" + amount + " to recipientNodeId=" + recipientNodeId);
-                node.getSnapshot().incrementMoneyInTransfer(recipientNodeId, amount);
-                RemoteUtil.getRemoteNode(recipientNodeId, node.getNodes().get(recipientNodeId)).acceptMoney(node.getId(), amount);
+                boolean isAccepted = RemoteUtil.getRemoteNode(recipientNodeId, node.getNodes().get(recipientNodeId)).acceptMoney(node.getId(), amount);
+                if (isAccepted) {
+                    logger.trace("Transferred amount=" + amount + " to recipientNodeId=" + recipientNodeId);
+                } else {
+                    node.getItem().restoreBalance();
+                    logger.trace("NOT Transferred amount=" + amount + " to recipientNodeId=" + recipientNodeId);
+                }
             } else {
                 logger.trace("NOT Withdraw money amount=" + amount);
             }
@@ -100,37 +100,26 @@ public final class NodeRemote extends UnicastRemoteObject implements NodeServer 
     }
 
     @Override
-    public void acceptMoney(int senderNodeId, int amount) throws RemoteException {
+    public boolean acceptMoney(int senderNodeId, int amount) throws RemoteException {
+        markerLock.writeLock().lock();
         itemAcceptLock.writeLock().lock();
         try {
             logger.trace("Accepting money amount=" + amount + " from senderNodeId=" + senderNodeId);
+            node.getSnapshot().incrementMoneyInTransfer(senderNodeId, amount);
             node.getItem().incrementBalance(amount);
-            RemoteUtil.getRemoteNode(senderNodeId, node.getNodes().get(senderNodeId)).transferredMoney(node.getId(), amount, true);
             logger.trace("Accepted, new balance=" + node.getItem().getBalance());
+            return true;
         } finally {
             itemAcceptLock.writeLock().unlock();
-        }
-    }
-
-    @Override
-    public void transferredMoney(int recipientNodeId, int amount, boolean isSuccess) throws RemoteException {
-        itemTransferredLock.writeLock().lock();
-        try {
-            node.getSnapshot().decrementMoneyInTransfer(recipientNodeId, amount);
-            if (isSuccess) {
-                logger.trace("Transferred amount=" + amount + " to recipientNodeId=" + recipientNodeId);
-            } else {
-                node.getItem().restoreBalance();
-                logger.trace("NOT Transferred amount=" + amount + " to recipientNodeId=" + recipientNodeId);
-            }
-        } finally {
-            itemTransferredLock.writeLock().unlock();
+            markerLock.writeLock().unlock();
         }
     }
 
     @Override
     public void receiveMarker(int nodeId) throws RemoteException {
         markerLock.writeLock().lock();
+        itemAcceptLock.writeLock().lock();
+        itemTransferLock.writeLock().lock();
         try {
             logger.debug("Received marker from nodeId=" + nodeId);
             @NotNull Snapshot snapshot = node.getSnapshot();
@@ -149,12 +138,14 @@ public final class NodeRemote extends UnicastRemoteObject implements NodeServer 
                     });
                 });
             }
-            snapshot.markRecorded(nodeId);
+            snapshot.stopRecording(nodeId);
             if (!snapshot.isRecording()) {
                 logger.debug("Received all markers for snapshot on nodeId=" + nodeId);
                 node.stopSnapshotRecording();
             }
         } finally {
+            itemTransferLock.writeLock().unlock();
+            itemAcceptLock.writeLock().unlock();
             markerLock.writeLock().unlock();
         }
     }

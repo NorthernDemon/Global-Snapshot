@@ -36,17 +36,19 @@ public final class Snapshot implements Serializable {
      * <p>
      * Map<NodeId>
      */
-    private final @NotNull Set<Integer> unrecordedNodes = new HashSet<>();
+    private final @NotNull Set<Integer> unrecordedChannels = new HashSet<>();
 
     public void startSnapshotRecording(int nodeId, int balance, Map<Integer, String> nodes) {
         id++;
         localBalance = balance;
-        unrecordedNodes.addAll(nodes.entrySet().parallelStream().filter(n -> n.getKey() != nodeId).map(Map.Entry::getKey).collect(Collectors.toList()));
+        moneyInTransfer = 0;
+        unrecordedChannels.addAll(nodes.entrySet().parallelStream().filter(n -> n.getKey() != nodeId).map(Map.Entry::getKey).collect(Collectors.toSet()));
     }
 
     public void stopSnapshotRecording() {
+        localBalance = 0;
         moneyInTransfer = 0;
-        unrecordedNodes.clear();
+        unrecordedChannels.clear();
     }
 
     public int getId() {
@@ -68,29 +70,17 @@ public final class Snapshot implements Serializable {
      * @param amount          of the money transfer
      */
     public void incrementMoneyInTransfer(int recipientNodeId, int amount) {
-        if (unrecordedNodes.contains(recipientNodeId)) {
+        if (unrecordedChannels.contains(recipientNodeId)) {
             moneyInTransfer += amount;
         }
     }
 
-    /**
-     * Decrements the money-in-transfer upon receiving the marker from that node
-     *
-     * @param recipientNodeId recipient of the money transfer
-     * @param amount          of the money transfer
-     */
-    public void decrementMoneyInTransfer(int recipientNodeId, int amount) {
-        if (unrecordedNodes.contains(recipientNodeId)) {
-            moneyInTransfer -= amount;
-        }
-    }
-
-    public void markRecorded(int nodeId) {
-        unrecordedNodes.remove(nodeId);
+    public void stopRecording(int nodeId) {
+        unrecordedChannels.remove(nodeId);
     }
 
     public boolean isRecording() {
-        return unrecordedNodes.size() != 0;
+        return unrecordedChannels.size() != 0;
     }
 
     @Override
@@ -120,7 +110,7 @@ public final class Snapshot implements Serializable {
                 .add("id", id)
                 .add("localBalance", localBalance)
                 .add("moneyInTransfer", moneyInTransfer)
-                .add("unrecordedNodes", Arrays.toString(unrecordedNodes.toArray()))
+                .add("unrecordedChannels", Arrays.toString(unrecordedChannels.toArray()))
                 .toString();
     }
 }
