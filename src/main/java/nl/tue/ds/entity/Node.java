@@ -80,8 +80,8 @@ public final class Node implements Serializable {
     }
 
     public void stopSnapshotRecording() {
-        snapshot.stopSnapshotRecording();
         StorageUtil.write(this);
+        snapshot.stopSnapshotRecording();
     }
 
     public void putNodes(@NotNull Map<Integer, String> nodes) {
