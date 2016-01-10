@@ -101,7 +101,6 @@ public final class NodeRemote extends UnicastRemoteObject implements NodeServer 
 
     @Override
     public boolean acceptMoney(int senderNodeId, int amount) throws RemoteException {
-        markerLock.writeLock().lock();
         itemAcceptLock.writeLock().lock();
         try {
             logger.trace("Accepting money amount=" + amount + " from senderNodeId=" + senderNodeId);
@@ -111,7 +110,6 @@ public final class NodeRemote extends UnicastRemoteObject implements NodeServer 
             return true;
         } finally {
             itemAcceptLock.writeLock().unlock();
-            markerLock.writeLock().unlock();
         }
     }
 
@@ -144,9 +142,9 @@ public final class NodeRemote extends UnicastRemoteObject implements NodeServer 
                 node.stopSnapshotRecording();
             }
         } finally {
-            itemTransferLock.writeLock().unlock();
-            itemAcceptLock.writeLock().unlock();
             markerLock.writeLock().unlock();
+            itemAcceptLock.writeLock().unlock();
+            itemTransferLock.writeLock().unlock();
         }
     }
 }
